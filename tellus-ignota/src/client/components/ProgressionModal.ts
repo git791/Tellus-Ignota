@@ -112,7 +112,14 @@ export class ProgressionModal {
   private renderProfile(prof: ProfileResponse) {
     if (!prof.ok) return;
     this.profName.innerText = `u/${prof.username}`;
-    this.profStats.innerText = `Rank: #${prof.rank > 0 ? prof.rank : '--'} | Score: ${prof.score} pts`;
+    let streakDisplay = '';
+    if (prof.streak > 0) {
+      streakDisplay = ` | 🔥 Streak: ${prof.streak} days`;
+      if (prof.streakMilestone) {
+        streakDisplay += ` (${prof.streakMilestone})`;
+      }
+    }
+    this.profStats.innerText = `Rank: #${prof.rank > 0 ? prof.rank : '--'} | Score: ${prof.score} pts${streakDisplay}`;
     
     if (prof.artifacts.length === 0) {
       this.profArtifacts.innerText = 'No artifacts found yet. Keep exploring!';

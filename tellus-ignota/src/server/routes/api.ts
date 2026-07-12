@@ -30,6 +30,7 @@ import { isFrontierTile, updateFrontierAfterReveal, getFrontier, initFrontier } 
 import { checkArtifactSpawn, postClueComment } from '../core/artifacts';
 import { getOrGenerateDailyGame, validateAnswer } from '../core/dailyGame';
 import { triggerGoldenAgeReveal } from '../core/goldenAge';
+import { getStreakData, processStreak, getStreakMilestone } from '../core/streak';
 
 type ErrorResponse = {
   status: 'error';
@@ -147,13 +148,14 @@ api.get('/game-init', async (c) => {
 
     const username = await reddit.getCurrentUsername().catch(() => undefined);
     const actualUsername = username ?? 'anonymous';
-    const [lastAction, hasWonGame, frontier, tileCount, scoreRaw, post] = await Promise.all([
+    const [lastAction, hasWonGame, frontier, tileCount, scoreRaw, post, streakData] = await Promise.all([
       redis.get(`lastAction:${actualUsername}`),
       redis.get(`wonDailyGame:${actualUsername}:${today}`),
       getFrontier(),
       redis.zCard('frontier').catch(() => 0),
       redis.zScore('leaderboard:score', actualUsername),
       reddit.getPostById(postId),
+      getStreakData(actualUsername),
     ]);
     
     const communityGoalReached = post.score >= COMMUNITY_GOAL_THRESHOLD;
@@ -171,6 +173,9 @@ api.get('/game-init', async (c) => {
       communityGoalReached,
       frontier,
       tileCount,
+      streak: streakData.currentStreak,
+      streakFreezes: streakData.freezes,
+      streakMilestone: getStreakMilestone(streakData.currentStreak),
     });
   } catch (error) {
     console.error('game-init error:', error);
@@ -365,6 +370,9 @@ api.post('/reveal', async (c) => {
 
     // 7 — Stamp daily action
     await redis.incrBy(`dailyActions:${username}:${today}`, 1);
+    if (dailyActionsCount === 0) {
+      await processStreak(username, today);
+    }
     
     // Also set lastAction for backward compatibility with UI checks
     await redis.set(`lastAction:${username}`, today);
@@ -470,10 +478,11 @@ api.get('/profile', async (c) => {
     const username = await reddit.getCurrentUsername();
     if (!username) return c.json<ProfileResponse>({ ok: false, error: 'Not logged in' }, 401);
 
-    const [scoreStr, artifactsZSet, allMembers] = await Promise.all([
+    const [scoreStr, artifactsZSet, allMembers, streakData] = await Promise.all([
       redis.zScore('leaderboard:score', username),
       redis.zRange(`user_artifacts:${username}`, 0, -1),
-      redis.zRange('leaderboard:score', 0, -1) // Fetch all to find rank, or use zRevRank if supported
+      redis.zRange('leaderboard:score', 0, -1), // Fetch all to find rank, or use zRevRank if supported
+      getStreakData(username)
     ]);
 
     const score = scoreStr ?? 0;
@@ -489,7 +498,9 @@ api.get('/profile', async (c) => {
       username,
       score,
       rank,
-      artifacts: artifactsRaw ?? []
+      artifacts: artifactsRaw ?? [],
+      streak: streakData.currentStreak,
+      streakMilestone: getStreakMilestone(streakData.currentStreak)
     });
   } catch (error) {
     return c.json<ProfileResponse>({ ok: false, error: 'Failed to load profile' }, 500);

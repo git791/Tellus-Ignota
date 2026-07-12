@@ -53,6 +53,8 @@ export class UIScene extends Phaser.Scene {
   private needsToPlayGame = false;
   private tileCount = 0;
   private communityGoalReached = false;
+  private currentStreak = 0;
+  private currentFreezes = 0;
   private countdownTimer: Phaser.Time.TimerEvent | null = null;
   private dailyGameModal!: DailyGameModal;
   private progressionModal!: ProgressionModal;
@@ -134,6 +136,8 @@ export class UIScene extends Phaser.Scene {
       this.needsToPlayGame = data.needsToPlayGame ?? false;
       this.communityGoalReached = data.communityGoalReached ?? false;
       this.tileCount = data.tileCount;
+      this.currentStreak = data.streak ?? 0;
+      this.currentFreezes = data.streakFreezes ?? 0;
       this.refreshHUD();
     });
 
@@ -143,6 +147,8 @@ export class UIScene extends Phaser.Scene {
       this.needsToPlayGame = data.needsToPlayGame ?? false;
       this.communityGoalReached = data.communityGoalReached ?? false;
       this.tileCount = data.tileCount;
+      this.currentStreak = data.streak ?? 0;
+      this.currentFreezes = data.streakFreezes ?? 0;
       this.refreshHUD();
     });
 
@@ -252,7 +258,14 @@ export class UIScene extends Phaser.Scene {
   // ─── HUD ─────────────────────────────────────────────────────────────────────
 
   private refreshHUD(): void {
-    this.usernameText.setText(`u/${this.username}`);
+    let streakDisplay = '';
+    if (this.currentStreak > 0) {
+      streakDisplay = `  🔥 ${this.currentStreak}`;
+      if (this.currentFreezes > 0) {
+        streakDisplay += ` ❄️ ${this.currentFreezes}`;
+      }
+    }
+    this.usernameText.setText(`u/${this.username}${streakDisplay}`);
     
     if (this.communityGoalReached) {
       this.communityGoalBanner.setVisible(true);

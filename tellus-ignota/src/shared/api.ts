@@ -39,6 +39,9 @@ export type GameInitResponse = {
   /** frontier tiles the current user is allowed to click */
   frontier: string[]; // "x:y" strings
   tileCount: number;
+  streak: number;
+  streakFreezes: number;
+  streakMilestone: string | null;
 };
 
 /** GET /api/tiles?minX&minY&maxX&maxY */
@@ -89,6 +92,8 @@ export type ProfileResponse = {
   score: number;
   rank: number;
   artifacts: string[]; // array of artifactIds
+  streak: number;
+  streakMilestone: string | null;
 } | {
   ok: false;
   error: string;
