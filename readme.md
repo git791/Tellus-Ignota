@@ -1,17 +1,17 @@
-# The Last Cartographer
+# Tellus Ignota
 
-Welcome to **The Last Cartographer**, a permanent, community-owned game built for Reddit's Games with a Hook (Devvit Web + Phaser). This is an interactive post where the entire subreddit uncovers a massive, shared map—one tile at a time, forever. 
+Welcome to **Tellus Ignota**, a permanent, community-owned game built for Reddit's Games with a Hook (Devvit Web + Phaser). This is an interactive post where the entire subreddit uncovers a massive, shared map—one tile at a time, forever. 
 
 ## 🗺️ The Complete Game Logic
 
-The core loop of The Last Cartographer is built around community collaboration, scarcity, and permanent attribution.
+The core loop of Tellus Ignota is built around community collaboration, scarcity, and permanent attribution.
 
 1. **The Shared Map:** The game features an infinite tile grid initially shrouded in the fog of war.
 2. **One Action Per Day:** Every user gets exactly one move per UTC day. 
 3. **Frontier Expansion:** You can only reveal a "frontier tile"—a fog tile adjacent to an already-revealed tile.
-4. **Permanent Attribution:** When you reveal a tile, your Reddit username and a timestamp are permanently stamped on it. Anyone can tap/hover on the tile to see who discovered it.
-5. **Artifact Discovery & Clues:** If the revealed tile contains an artifact, an automatic clue is posted in the Reddit comment thread. The community then races to decode the clue.
-6. **Seasons:** The map never resets to zero; instead, it's archived into seasons, providing long-horizon progression.
+4. **Permanent Attribution:** When you reveal a tile, your Reddit username and a timestamp are permanently stamped on it. 
+5. **Artifact Discovery & Clues:** If the revealed tile contains an artifact, an automatic clue is posted in the Reddit comment thread.
+6. **Scavenger Hunt:** When an artifact clue is posted, players can reply to the comment with the exact word **Claim** to receive a copy of the artifact in their personal gallery.
 
 ## 🚀 Walkthrough & How to Play
 
@@ -19,36 +19,41 @@ The core loop of The Last Cartographer is built around community collaboration, 
 2. **Survey the Map:** Pan and zoom to view the current state of the world, checking out terrain and newly revealed tiles.
 3. **Pick Your Move:** Find a highlighted "frontier tile" at the edge of the fog.
 4. **Reveal:** Tap or click to spend your daily action and reveal the tile.
-5. **Join the Hunt:** Check the comments section for new clues about artifacts. If your tile triggered an artifact, interact with the community to decipher the clue.
-6. **Return Daily:** Come back the next day for your next move! Skip a day, and someone else might claim the tile you had your eye on.
+5. **Daily Games:** Play a daily mini-game (Anagrams, Trivia, Pattern matching, etc.) for extra engagement!
+6. **Join the Hunt:** Check the comments section for new clues about artifacts and claim them.
 
 ## 🔍 What's Under the Tiles?
 
-When you clear the fog, you might uncover:
+When you clear the fog, you uncover:
 
-* **Terrains:** The map features procedurally generated biomes.
-  * 🌊 **Water**
-  * 🌲 **Forest**
-  * 🏜️ **Desert**
-  * ⛰️ **Mountain**
-  * 🏛️ **Ruins** (Rare biome with a higher chance for artifacts)
-* **Obstacles (Hazards):** Some tiles may reveal natural obstacles like deep chasms or cursed grounds that require the community to spend extra actions (or work together) to bypass.
-* **Artifacts:** Rare items whose spawn locations are tied to live Reddit data (like the post's karma or comment count).
-* **Bonus Tiles (The Clicker Mechanic):** Occasionally, a "Resonance Tile" is uncovered. These tiles introduce a mini-game *clicker* element. The community can click these tiles rapidly to pool points, unlocking temporary boosts like allowing a second action for the day or revealing a 3x3 radius of fog instantly.
+* **Terrains:** The map features procedurally generated biomes:
+  * 🌊 **Shallow Water**
+  * 🌲 **Ancient Forest**
+  * 🌿 **Open Plains**
+  * 🏜️ **Scorched Desert**
+  * ⛰️ **Craggy Mountain**
+  * 🏛️ **Lost Ruins**
+* **Artifacts:** Rare items (Common, Rare, Legendary) like the *Broken Compass*, *Resonance Stone*, or *Star Chart of the Unmapped Sky*. Their spawn locations are determined dynamically by the live post karma (Score * 31 + Comment Count). Furthermore, artifacts often dynamically name themselves after trending Reddit posts!
 
-## 🏆 Game Modes
+## ⛏️ The Golden Age (Clicker Mechanics)
 
-While the core game is a persistent daily exploration, there are different active layers:
-* **The Grand Expedition (Main Mode):** The standard daily reveal mechanics.
-* **Artifact Rush:** Time-limited events where the spawn rate of artifacts is boosted based on subreddit activity (upvotes and comments).
-* **Clicker / Resonance Mode:** Triggered by Bonus Tiles, shifting gameplay temporarily to rapid, collective tapping to achieve a community goal.
+Periodically, the **Golden Age Excavation** clicker event can be triggered. 
+* **Community Goal:** The entire community pools their clicks together to reach a massive goal (e.g., 100,000 clicks).
+* **Personal Contribution:** You must contribute a minimum amount of personal clicks (e.g., 100) to qualify for the loot.
+* **The Reward:** When the community goal is reached, a **Golden Age Reveal** is triggered. A 5x5 chunk of frontier tiles is instantly revealed by "The Community", automatically dropping clues for any artifacts discovered in that massive blast.
 
-## 🏅 Global Rank System & Leaderboards
+## 🧩 Daily Games
 
-* **Tile Barons:** Ranks users by the total number of tiles they have personally revealed across all seasons.
-* **First Finders:** A wall of fame for players who made the initial discovery of rare artifacts or unique biomes.
-* **Named Landmarks:** Players who discover ultra-rare tiles (like a Mountain Peak or major Ruin) get to permanently *name* it, cementing their legacy in the map's lore.
-* **Loremasters:** Players whose Reddit comments are upvoted to become the "canon lore" for a discovered artifact.
+To keep the community engaged, a new randomly generated minigame appears daily. Game types include:
+* **Anagrams, Riddles, and Trivia**
+* **Math & Pattern Recognition**
+* **Memory & Reaction Tests**
+* **Prediction & Community Questions** (e.g., predicting tomorrow's comment count)
+
+## 🏅 Global Rank System & Progression
+
+* **Leaderboards:** The game tracks and displays a global leaderboard ranking users by their score and contributions.
+* **Profiles:** Players have a personal profile displaying their current rank, total score, and a gallery of their collected **Artifacts**.
 
 ---
 
@@ -56,22 +61,21 @@ While the core game is a persistent daily exploration, there are different activ
 
 ### The Stack
 * **Frontend:** Phaser 3 (TypeScript) running inside a Devvit Web iframe.
-* **Backend:** Devvit Server Functions (Node/TypeScript).
+* **Backend:** Devvit Server Functions (Node/Hono) + TypeScript.
 * **Persistence:** Devvit's built-in Redis-backed KV store.
-* **Integration:** Native Reddit API (via Devvit) for grabbing live karma/comment data.
+* **Integration:** Native Reddit API (via Devvit) for grabbing live karma/comment data and posting clues.
 
-### Architecture
-The game uses a **Client-Server model** entirely contained within the Devvit ecosystem:
-1. **Client (Phaser 3):** Handles the camera pan/zoom/pinch over the tile grid. Renders the revealed tiles and a dynamic fog layer. Sends reveal requests to the backend.
-2. **Devvit Web Bridge:** Passes fetch requests between the webview and the Devvit server.
-3. **Devvit Server Functions:** Validates the one-action-per-day rule and adjacency requirements. Generates terrain on the fly and writes to Redis. Reads live Reddit stats to determine artifact spawns and auto-posts clues.
-4. **Redis KV Store:** Stores tile data `tile:{x}:{y}`, the current `frontier` set, daily action trackers `lastAction:{userId}`, and season metadata.
-
-### Implementation Details & Logic
-* **Infinite Map Generation:** The world is NOT pre-generated. Terrain is created deterministically on-demand using a seeded Simplex Noise function (e.g., `noise2D`). This means storage costs scale only with explored tiles, making the map practically infinite.
-* **Phaser Chunking:** To handle an infinitely expanding map, Phaser divides the world into chunks (e.g., 32x32 tiles). Only chunks within the camera's viewport are rendered, maintaining high performance regardless of the map's total size.
-* **Two-Layer Fog of War:** Fog isn't managed via individual sprites. Instead, a blank `Tilemap` layer is filled with fog tiles. When a tile is revealed, the client simply removes the tile at `(x, y)` from the fog layer, exposing the underlying terrain layer.
-* **Live-Data Spawns:** Artifact locations are derived from the live post score and comment count. A hash function takes the current karma/comments as a seed to pick a random frontier tile for an artifact to spawn.
+### Architecture & Implementation Logic
+The game operates on a robust **Client-Server model** entirely contained within the Devvit ecosystem:
+1. **Client (Phaser 3):** Handles camera controls (CameraController), dynamic terrain rendering (TerrainPainter), and chunk management (ChunkManager). 
+2. **Devvit Web Bridge (`shared/api.ts`):** Defines the strictly typed contracts for fetching chunks (`/api/tiles`) and revealing tiles (`/api/reveal`).
+3. **Devvit Server Functions:** Validates the daily limits and adjacency constraints. Generates terrain deterministically on the fly. Dynamically calculates artifact spawns based on live post engagement and dispatches automatic clue comments to the thread.
+4. **Redis KV Store:** Efficiently stores tile data (`tile:{x}:{y}`), tracks the active `frontier` set using sorted sets, handles daily game state (`daily_game:{date}`), and coordinates the global clicker counts.
+5. **Infinite Map Generation:** The world is NOT pre-generated. Terrain is evaluated deterministically using seeded Simplex Noise functions. This ensures that storage costs scale strictly with explored tiles, making the map practically infinite.
 
 ---
 *Built for the Reddit "Games with a Hook" Hackathon.*
+
+## Contributors
+* Mohammed Ayaan Adil Ahmed
+* Asmae Serji

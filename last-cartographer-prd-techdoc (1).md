@@ -1,4 +1,4 @@
-# The Last Cartographer
+# Tellus Ignota
 ### PRD + Technical Design Doc
 **Hackathon:** Reddit's Games with a Hook (Devvit Web + Phaser)
 **Status:** Draft v2 — updated with judging-criteria mapping, tilemap/chunking architecture, and team tooling decisions. Ready to hand to a coding agent (Antigravity / Claude Code) or build manually.

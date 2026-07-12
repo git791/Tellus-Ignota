@@ -75,3 +75,7 @@ The game operates on a robust **Client-Server model** entirely contained within 
 
 ---
 *Built for the Reddit "Games with a Hook" Hackathon.*
+
+## Contributors
+* Mohammed Ayaan Adil Ahmed
+* Asmae Serji
