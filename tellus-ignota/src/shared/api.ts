@@ -49,6 +49,8 @@ export type TilesResponse = {
   type: 'tiles';
   /** key = "x:y", value = TileData */
   tiles: Record<string, TileData>;
+  /** list of users currently at their last explored tile in this chunk */
+  activeUsers?: { username: string; x: number; y: number }[];
 };
 
 /** POST /api/reveal  body: RevealRequest */

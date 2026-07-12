@@ -241,7 +241,19 @@ api.get('/tiles', async (c) => {
   }
   await Promise.all(promises);
 
-  return c.json<TilesResponse>({ type: 'tiles', tiles });
+  // Fetch active users in this chunk
+  const activeUsers: { username: string; x: number; y: number }[] = [];
+  const userLocationsRaw = await redis.hGetAll('userLocations');
+  for (const [username, loc] of Object.entries(userLocationsRaw)) {
+    const [sx, sy] = loc.split(':');
+    const ux = parseInt(sx);
+    const uy = parseInt(sy);
+    if (ux >= minX && ux <= maxX && uy >= minY && uy <= maxY) {
+      activeUsers.push({ username, x: ux, y: uy });
+    }
+  }
+
+  return c.json<TilesResponse>({ type: 'tiles', tiles, activeUsers });
 });
 
 /**
@@ -377,9 +389,12 @@ api.post('/reveal', async (c) => {
     // Also set lastAction for backward compatibility with UI checks
     await redis.set(`lastAction:${username}`, today);
 
+    // Save the user's last explored location for the MMO map sprites
+    await redis.hSet('userLocations', { [username]: `${x}:${y}` });
+
     // 8 — Post clue comment if artifact found
     if (artifactId) {
-      await postClueComment(artifactId, x, y).catch((err) => {
+      await postClueComment(artifactId, x, y, postId).catch((err) => {
         // Don't fail the reveal if comment posting fails
         console.error('Failed to post clue comment:', err);
       });

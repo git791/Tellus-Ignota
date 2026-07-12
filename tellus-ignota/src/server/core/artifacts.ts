@@ -138,10 +138,11 @@ export async function postClueComment(
   artifactId: string,
   x: number,
   y: number,
+  postId: string,
   cycleId?: number
 ): Promise<void> {
-  const postIdObj = context.postId;
-  if (!postIdObj || !isT3(postIdObj)) return;
+  if (!postId) return;
+  const postIdObj = T3(postId);
 
   const username = await reddit.getCurrentUsername();
   const readableName = artifactId.replace(/_/g, ' ').toUpperCase();

@@ -395,45 +395,70 @@ export class UIScene extends Phaser.Scene {
 
   // ─── Artifact banner ─────────────────────────────────────────────────────────
 
-  private buildArtifactBanner(width: number, _height: number): void {
-    const bg = this.add.rectangle(0, 0, width - 40, 72, 0x1a0a2e, 0.95)
-      .setStrokeStyle(2, 0xd4a017, 1);
-    const titleTxt = this.add.text(0, -18, '✨ ARTIFACT DISCOVERED ✨', {
+  private buildArtifactBanner(width: number, height: number): void {
+    const bg = this.add.rectangle(0, 0, width - 40, 180, 0x1a0a2e, 0.95)
+      .setStrokeStyle(3, 0xd4a017, 1);
+      
+    // Glowing aura
+    const glow = this.add.circle(0, -10, 50, 0xd4a017, 0.3);
+    this.tweens.add({ targets: glow, alpha: 0.1, scale: 1.2, yoyo: true, repeat: -1, duration: 1000 });
+
+    const titleTxt = this.add.text(0, -65, '✨ ARTIFACT DISCOVERED ✨', {
       fontFamily: '"Georgia", serif',
-      fontSize: '16px',
+      fontSize: '18px',
       color: '#d4a017',
-    }).setOrigin(0.5);
-    const subtitleTxt = this.add.text(0, 10, '', {
-      fontFamily: '"Georgia", serif',
-      fontSize: '13px',
-      color: '#ffffff',
+      fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    this.artifactBanner = this.add.container(width / 2, 90, [bg, titleTxt, subtitleTxt]);
+    const icon = this.add.text(0, -15, '🏺', { fontSize: '48px' }).setOrigin(0.5);
+    // Bouncing icon
+    this.tweens.add({ targets: icon, y: -25, yoyo: true, repeat: -1, duration: 600, ease: 'Sine.inOut' });
+
+    const subtitleTxt = this.add.text(0, 35, '', {
+      fontFamily: '"Georgia", serif',
+      fontSize: '15px',
+      color: '#ffffff',
+    }).setOrigin(0.5);
+    
+    const loreTxt = this.add.text(0, 65, 'Added to your collection!\nCheck Reddit to claim!', {
+      fontFamily: '"Inter", sans-serif',
+      fontSize: '12px',
+      color: '#aaaaaa',
+      align: 'center'
+    }).setOrigin(0.5);
+
+    this.artifactBanner = this.add.container(width / 2, height / 2, [bg, glow, titleTxt, icon, subtitleTxt, loreTxt]);
     this.artifactBanner.setVisible(false);
     this.artifactBanner.setDepth(200);
 
     // Store reference to subtitle text for updates
     this.artifactBanner.setData('subtitle', subtitleTxt);
-    this.artifactBanner.setData('bg', bg);
+    this.artifactBanner.setData('baseY', height / 2);
   }
 
   private showArtifactBanner(artifactId: string): void {
     const label = artifactId.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
     const subtitleTxt = this.artifactBanner.getData('subtitle') as Phaser.GameObjects.Text;
-    subtitleTxt.setText(`A ${label} has been unearthed!`);
+    subtitleTxt.setText(`${label}`);
 
-    this.artifactBanner.setVisible(true).setAlpha(0).setY(70);
+    const targetY = this.artifactBanner.getData('baseY') as number;
+    this.artifactBanner.setVisible(true).setAlpha(0).setY(targetY + 30).setScale(0.8);
+    
     this.tweens.add({
       targets: this.artifactBanner,
-      alpha: 1, y: 90,
-      duration: 500,
+      alpha: 1, 
+      y: targetY,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 600,
       ease: 'Back.Out',
       onComplete: () => {
         this.time.delayedCall(4000, () => {
           this.tweens.add({
             targets: this.artifactBanner,
-            alpha: 0, y: 70,
+            alpha: 0, 
+            scaleX: 0.9,
+            scaleY: 0.9,
             duration: 400,
             onComplete: () => this.artifactBanner.setVisible(false),
           });

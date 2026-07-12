@@ -30,6 +30,8 @@ export class MapScene extends Phaser.Scene {
 
   // Archaeologist avatar
   private avatar: Phaser.GameObjects.Sprite | null = null;
+  private avatarContainer: Phaser.GameObjects.Container | null = null;
+  private otherPlayers: Map<string, Phaser.GameObjects.Container> = new Map();
 
   // Drag detection — prevent reveal on drag end
   private pointerDownX = 0;
@@ -81,6 +83,9 @@ export class MapScene extends Phaser.Scene {
       this.cameras.resize(size.width, size.height);
     });
 
+    // Listen for active users from chunks
+    this.events.on('active-users-loaded', this.updateActiveUsers, this);
+
     // Fetch game state from server
     void this.initFromServer();
   }
@@ -123,10 +128,34 @@ export class MapScene extends Phaser.Scene {
 
   private setupAvatar(): void {
     try {
-      this.avatar = this.add.sprite(TILE_SIZE / 2, TILE_SIZE / 2, 'cartographer');
-      this.avatar.setDepth(20);
-      const scale = (TILE_SIZE / Math.max(this.avatar.width, this.avatar.height)) * 0.8;
-      this.avatar.setScale(scale);
+      // Load avatar texture
+      if (this.textures.exists('cartographer')) {
+        this.avatar = this.add.sprite(TILE_SIZE / 2, TILE_SIZE / 2, 'cartographer');
+        this.avatar.setDepth(20);
+        const scale = (TILE_SIZE / Math.max(this.avatar.width, this.avatar.height)) * 0.8;
+        this.avatar.setScale(scale);
+
+        // Add a bouncing arrow to highlight the current player
+        const arrow = this.add.text(0, -25, '▼', { fontSize: '12px', color: '#00ff00' })
+          .setOrigin(0.5, 1)
+          .setShadow(0, 0, '#00ff00', 4, false, true);
+        
+        const avatarContainer = this.add.container(TILE_SIZE / 2, TILE_SIZE / 2, [this.avatar, arrow]);
+        avatarContainer.setDepth(20);
+        this.avatar.setPosition(0, 0);
+        
+        this.tweens.add({
+          targets: arrow,
+          y: -30,
+          yoyo: true,
+          repeat: -1,
+          duration: 500,
+          ease: 'Sine.inOut'
+        });
+        
+        // We'll move the whole container instead of just the sprite
+        this.avatarContainer = avatarContainer;
+      }
       this.applyCosmetics();
     } catch (e) {
       console.warn('Avatar setup failed:', e);
@@ -170,13 +199,13 @@ export class MapScene extends Phaser.Scene {
   }
 
   private moveAvatarToTile(tx: number, ty: number): void {
-    if (!this.avatar) return;
+    if (!this.avatarContainer) return;
 
     const wx = tx * TILE_SIZE + TILE_SIZE / 2;
     const wy = ty * TILE_SIZE + TILE_SIZE / 2;
 
     this.tweens.add({
-      targets: this.avatar,
+      targets: this.avatarContainer,
       x: wx,
       y: wy,
       duration: 400,
@@ -352,5 +381,70 @@ export class MapScene extends Phaser.Scene {
     this.tweens.add({ targets: img, alpha: 0.85, duration: 400, ease: 'Power1' });
 
     this.decorations.set(key, img);
+  }
+
+  // ─── MMO Sprites ─────────────────────────────────────────────────────────────
+
+  private updateActiveUsers(users: { username: string; x: number; y: number }[]): void {
+    const activeNames = new Set<string>();
+
+    for (const u of users) {
+      if (u.username === this.username) continue; // Skip current user (we have our own avatar)
+      activeNames.add(u.username);
+
+      if (!this.otherPlayers.has(u.username)) {
+        // Create new MMO sprite container
+        const wx = u.x * TILE_SIZE + TILE_SIZE / 2;
+        const wy = u.y * TILE_SIZE + TILE_SIZE / 2;
+
+        const container = this.add.container(wx, wy);
+        container.setDepth(18);
+
+        const sprite = this.add.sprite(0, 0, 'cartographer');
+        const scale = (TILE_SIZE / Math.max(sprite.width, sprite.height)) * 0.8;
+        sprite.setScale(scale);
+        sprite.setTint(0xaaaaaa); // Slight tint for others
+
+        // Make interactive to show name
+        sprite.setInteractive();
+        const text = this.add.text(0, -20, u.username, {
+          fontSize: '10px',
+          color: '#ffffff',
+          backgroundColor: '#000000aa',
+          padding: { x: 2, y: 1 }
+        }).setOrigin(0.5, 1).setVisible(false);
+
+        sprite.on('pointerover', () => text.setVisible(true));
+        sprite.on('pointerout', () => text.setVisible(false));
+        sprite.on('pointerdown', () => text.setVisible(!text.visible));
+
+        container.add([sprite, text]);
+        this.otherPlayers.set(u.username, container);
+      } else {
+        // Update existing player position
+        const container = this.otherPlayers.get(u.username)!;
+        const wx = u.x * TILE_SIZE + TILE_SIZE / 2;
+        const wy = u.y * TILE_SIZE + TILE_SIZE / 2;
+        
+        // Only tween if they actually moved
+        if (container.x !== wx || container.y !== wy) {
+          this.tweens.add({
+            targets: container,
+            x: wx,
+            y: wy,
+            duration: 1000,
+            ease: 'Sine.inOut'
+          });
+        }
+      }
+    }
+
+    // Remove users who are no longer in this chunk or disconnected
+    for (const [name, container] of this.otherPlayers.entries()) {
+      if (!activeNames.has(name)) {
+        container.destroy();
+        this.otherPlayers.delete(name);
+      }
+    }
   }
 }
