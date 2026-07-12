@@ -1,12 +1,18 @@
-body {
+html, body {
+  width: 100%;
+  height: 100%;
   margin: 0;
   padding: 0;
   color: rgba(255, 255, 255, 0.87);
   background-color: #0f0f0f;
+  overflow: hidden;
 }
 
 #app {
-  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
   height: 100vh;
   overflow: hidden;
 }
@@ -14,4 +20,143 @@ body {
 #game-container {
   width: 100%;
   height: 100%;
+}
+
+#daily-game-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 15, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* above canvas */
+}
+
+.daily-game-modal {
+  background: #111122;
+  border: 2px solid #d4a017;
+  padding: 24px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+  font-family: "Georgia", serif;
+}
+
+#dg-title {
+  color: #d4a017;
+  margin-top: 0;
+}
+
+#dg-input {
+  width: 80%;
+  padding: 8px;
+  margin: 12px 0;
+  background: #222233;
+  color: white;
+  border: 1px solid #444466;
+  border-radius: 4px;
+}
+
+#dg-submit {
+  background: #d4a017;
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.option-btn {
+  background: #222233;
+  color: white;
+  border: 1px solid #d4a017;
+  padding: 8px;
+  margin: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#progression-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 15, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001; /* above canvas and equal to daily game */
+}
+
+.progression-modal {
+  background: #111122;
+  border: 2px solid #d4a017;
+  padding: 24px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  font-family: "Georgia", serif;
+  color: #fff;
+}
+
+.prog-tabs {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #444466;
+  padding-bottom: 8px;
+}
+
+.prog-tab {
+  background: none;
+  border: none;
+  color: #888899;
+  font-size: 16px;
+  cursor: pointer;
+  font-family: "Georgia", serif;
+}
+
+.prog-tab.active {
+  color: #d4a017;
+  font-weight: bold;
+}
+
+.prog-content {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.prog-content h3 {
+  color: #d4a017;
+  text-align: center;
+  margin-top: 0;
+}
+
+.lb-entry {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid #222233;
+}
+
+.lb-entry:nth-child(even) {
+  background: #1a1a2e;
+}
+
+.lb-rank { font-weight: bold; color: #d4a017; width: 30px;}
+.lb-name { flex-grow: 1; }
+.lb-score { color: #aaa; }
+
+.close-btn {
+  background: #222233;
+  color: white;
+  border: 1px solid #444466;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-top: 16px;
 }

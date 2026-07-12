@@ -9,7 +9,7 @@
     "deploy": "npm run type-check && npm run lint && devvit upload",
     "dev": "devvit playtest",
     "launch": "npm run deploy && devvit publish",
-    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "login": "devvit login",
     "prettier": "prettier --write .",
     "type-check": "tsc --build"
@@ -21,9 +21,11 @@
     "@devvit/start": "0.13.6",
     "@devvit/web": "0.13.6",
     "@hono/node-server": "2.0.6",
+    "alea": "^1.0.1",
     "devvit": "0.13.6",
     "hono": "4.12.27",
-    "phaser": "4.2.0"
+    "phaser": "4.2.0",
+    "simplex-noise": "^4.0.3"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

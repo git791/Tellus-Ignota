@@ -10,6 +10,41 @@
   <body>
     <div id="app">
       <div id="game-container"></div>
+      
+      <!-- Daily Game Overlay -->
+      <div id="daily-game-overlay" style="display: none;">
+        <div class="daily-game-modal">
+          <h2 id="dg-title">Daily Challenge</h2>
+          <p id="dg-question"></p>
+          <div id="dg-options"></div>
+          <input type="text" id="dg-input" placeholder="Your answer..." style="display:none;"/>
+          <button id="dg-submit">Submit</button>
+          <p id="dg-error" style="color:#ffaaaa; display:none;"></p>
+        </div>
+      </div>
+      <!-- Progression Modal -->
+      <div id="progression-overlay" style="display: none;">
+        <div class="progression-modal">
+          <div class="prog-tabs">
+            <button id="tab-leaderboard" class="prog-tab active">🏆 Leaderboard</button>
+            <button id="tab-profile" class="prog-tab">👤 My Profile</button>
+          </div>
+          
+          <div id="prog-content-leaderboard" class="prog-content">
+            <h3>Top Cartographers</h3>
+            <div id="leaderboard-list">Loading...</div>
+          </div>
+          
+          <div id="prog-content-profile" class="prog-content" style="display: none;">
+            <h3 id="prof-name">u/unknown</h3>
+            <p id="prof-stats">Rank: -- | Score: --</p>
+            <h4>Artifact Gallery</h4>
+            <div id="prof-artifacts">None found yet.</div>
+          </div>
+          
+          <button id="prog-close" class="close-btn">Close</button>
+        </div>
+      </div>
     </div>
     <script type="module" src="game.ts"></script>
   </body>
