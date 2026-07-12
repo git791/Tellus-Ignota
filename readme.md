@@ -10,8 +10,8 @@ The core loop of Tellus Ignota is built around community collaboration, scarcity
 2. **One Action Per Day:** Every user gets exactly one move per UTC day. 
 3. **Frontier Expansion:** You can only reveal a "frontier tile"—a fog tile adjacent to an already-revealed tile.
 4. **Permanent Attribution:** When you reveal a tile, your Reddit username and a timestamp are permanently stamped on it. 
-5. **Artifact Discovery & Clues:** If the revealed tile contains an artifact, an automatic clue is posted in the Reddit comment thread.
-6. **Scavenger Hunt:** When an artifact clue is posted, players can reply to the comment with the exact word **Claim** to receive a copy of the artifact in their personal gallery.
+5. **Artifact Discovery & Clues:** If you uncover a tile that contains an artifact, it is **instantly and automatically** added to your personal profile gallery. You do not need to leave the game! The game will also automatically post a clue in the Reddit comment thread to announce your discovery to the community.
+6. **Scavenger Hunt:** To allow the rest of the community to participate, *other* players who see the bot's comment in the Reddit thread can reply to it with the exact word **Claim** to receive a copy of that artifact in their own gallery.
 
 ## 🚀 Walkthrough & How to Play
 
