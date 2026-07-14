@@ -10,8 +10,9 @@ The core loop of Tellus Ignota is built around community collaboration, scarcity
 2. **One Action Per Day:** Every user gets exactly one move per UTC day. 
 3. **Frontier Expansion:** You can only reveal a "frontier tile"—a fog tile adjacent to an already-revealed tile.
 4. **Permanent Attribution:** When you reveal a tile, your Reddit username and a timestamp are permanently stamped on it. 
-5. **Artifact Discovery & Clues:** If you uncover a tile that contains an artifact, it is **instantly and automatically** added to your personal profile gallery. You do not need to leave the game! The game will also automatically post a clue in the Reddit comment thread to announce your discovery to the community.
-6. **Scavenger Hunt:** To allow the rest of the community to participate, *other* players who see the bot's comment in the Reddit thread can reply to it with the exact word **Claim** to receive a copy of that artifact in their own gallery.
+5. **Real-time MMO Presence:** See other players dynamically exploring the map! As soon as someone uncovers a tile, their avatar glides to their new position live on your screen.
+6. **Artifact Discovery & Clues:** If you uncover a tile that contains an artifact, a congratulatory banner pops up instantly, and the artifact is added to your personal profile gallery. The game also automatically posts a clue in the Reddit comment thread to announce your discovery.
+7. **Scavenger Hunt:** To allow the rest of the community to participate, *other* players who see the bot's comment in the Reddit thread can reply to it with the exact word **Claim** to receive a copy of that artifact.
 
 ## 🚀 Walkthrough & How to Play
 
@@ -42,13 +43,13 @@ Periodically, the **Golden Age Excavation** clicker event can be triggered.
 * **Personal Contribution:** You must contribute a minimum amount of personal clicks (e.g., 100) to qualify for the loot.
 * **The Reward:** When the community goal is reached, a **Golden Age Reveal** is triggered. A 5x5 chunk of frontier tiles is instantly revealed by "The Community", automatically dropping clues for any artifacts discovered in that massive blast.
 
-## 🧩 Daily Games
+## 🧩 Daily Minigames & Streaks
 
 To keep the community engaged, a new randomly generated minigame appears daily. Game types include:
 * **Anagrams, Riddles, and Trivia**
 * **Math & Pattern Recognition**
-* **Memory & Reaction Tests**
-* **Prediction & Community Questions** (e.g., predicting tomorrow's comment count)
+
+Playing daily builds your **Exploration Streak**. As you maintain your streak, you earn **Streak Freezes**, which act as a safety net to protect your progress if you miss a day. Freezes and streaks are evaluated dynamically ("lazy evaluation") to keep the server efficient.
 
 ## 🏅 Global Rank System & Progression
 

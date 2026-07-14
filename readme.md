@@ -1,6 +1,6 @@
 # Tellus Ignota
 
-Welcome to **Tellus Ignota**, a permanent, community-owned game built for Reddit's Games with a Hook (Devvit Web + Phaser). This is an interactive post where the entire subreddit uncovers a massive, shared map—one tile at a time, forever. 
+Welcome to **Tellus Ignota**, a permanent, community-owned game built for Reddit's Games with a Hook (Devvit Web + Phaser). By "permanent", we mean that the game world persists indefinitely. Every tile revealed, every artifact discovered, and every action taken is saved globally and forever, leaving a lasting mark with your username attached. This is an interactive post where the entire subreddit uncovers a massive, shared map, one tile at a time, forever. 
 
 ## 🗺️ The Complete Game Logic
 
