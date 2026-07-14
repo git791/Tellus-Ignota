@@ -83,8 +83,13 @@ export class MapScene extends Phaser.Scene {
       this.cameras.resize(size.width, size.height);
     });
 
-    // Listen for active users from chunks
-    this.events.on('active-users-loaded', this.updateActiveUsers, this);
+    // Start polling active users
+    this.time.addEvent({
+      delay: 3000,
+      loop: true,
+      callback: this.pollActiveUsers,
+      callbackScope: this
+    });
 
     // Fetch game state from server
     void this.initFromServer();
@@ -112,6 +117,19 @@ export class MapScene extends Phaser.Scene {
 
     } catch (err) {
       console.error('initFromServer error:', err);
+    }
+  }
+
+  private async pollActiveUsers(): Promise<void> {
+    try {
+      const res = await fetch('/api/active-users');
+      if (!res.ok) return;
+      const data = await res.json() as import('../../shared/api').ActiveUsersResponse;
+      if (data.type === 'active-users') {
+        this.updateActiveUsers(data.activeUsers);
+      }
+    } catch (err) {
+      console.error('Failed to poll active users', err);
     }
   }
 

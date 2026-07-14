@@ -233,7 +233,7 @@ export class ChunkManager {
       const res = await fetch(url);
       if (!res.ok) return;
 
-      const data = await res.json() as { type: string; tiles: Record<string, TileData>; activeUsers?: any[] };
+      const data = await res.json() as { type: string; tiles: Record<string, TileData> };
       if (data.type !== 'tiles') return;
 
       for (const [key, tileData] of Object.entries(data.tiles)) {
@@ -241,11 +241,6 @@ export class ChunkManager {
       }
 
       this.paintChunkFromCache(chunk, minX, minY);
-      
-      // Emit active users for the MapScene to render
-      if (data.activeUsers && data.activeUsers.length > 0) {
-        this.scene.events.emit('active-users-loaded', data.activeUsers);
-      }
     } catch (err) {
       console.error('ChunkManager fetch error:', err);
     }

@@ -1,6 +1,6 @@
 import { redis, reddit, context } from '@devvit/web/server';
 
-export type GameType = 'Anagram' | 'Prediction' | 'Memory' | 'Reaction' | 'Riddle' | 'Pattern' | 'Community' | 'Daily Riddles' | 'Trivia' | 'Math';
+export type GameType = 'Anagram' | 'Riddle' | 'Pattern' | 'Trivia' | 'Math';
 
 export interface DailyGame {
   id: string;
@@ -12,7 +12,7 @@ export interface DailyGame {
 }
 
 const GAME_TYPES: GameType[] = [
-  'Anagram', 'Prediction', 'Memory', 'Reaction', 'Riddle', 'Pattern', 'Community', 'Daily Riddles', 'Trivia', 'Math'
+  'Anagram', 'Riddle', 'Pattern', 'Trivia', 'Math'
 ];
 
 /**
@@ -54,39 +54,7 @@ export async function getOrGenerateDailyGame(): Promise<DailyGame> {
       question = `What is ${a} + ${b}?`;
       answer = (a + b).toString();
       break;
-    case 'Prediction':
-      question = "Guess tomorrow's comment count at 6PM. (There's no right/wrong answer, just type your prediction!)";
-      answer = "prediction"; // Validation for this is custom
-      break;
-    case 'Memory':
-      question = "Watch the sequence of tiles and reproduce it. (There's no right/wrong answer for now, just play along!)";
-      answer = "memory"; // Handled client-side mostly
-      break;
-    case 'Reaction':
-      question = "Click the golden tile within 1 second of it flashing! (There's no right/wrong answer for now, just have fun!)";
-      answer = "reaction"; // Client-side handled
-      break;
-    case 'Community':
-      // Try to fetch top comment from reddit
-      question = "What was the top comment on yesterday's thread? (There's no right/wrong answer, just share your thoughts!)";
-      answer = "community";
-      try {
-        if (context.postId) {
-          const comments = await reddit.getComments({ postId: context.postId, limit: 1, sort: 'top' });
-          let topComment = undefined;
-          for await (const c of comments) {
-            topComment = c;
-            break;
-          }
-          if (topComment) {
-            answer = topComment.body.split(' ')[0] ?? "community";
-            question = `What is the first word of the top comment? (There's no right/wrong answer!)`;
-          }
-        }
-      } catch (e) {
-        console.warn("Failed to fetch top comment", e);
-      }
-      break;
+
     case 'Riddle':
     case 'Daily Riddles':
       const riddles = [
@@ -120,9 +88,9 @@ export async function getOrGenerateDailyGame(): Promise<DailyGame> {
 /**
  * Validates the user's answer.
  */
-export function validateAnswer(game: DailyGame, userAnswer: string): boolean {
-  if (game.type === 'Reaction' || game.type === 'Memory' || game.type === 'Prediction' || game.type === 'Community') {
-    return true; // Any answer is accepted for these
+export function validateGameAnswer(game: DailyGame, userResponse: string): boolean {
+  if (game.type === 'Math') {
+    return userResponse.trim() === game.answer;
   }
-  return userAnswer.trim().toLowerCase() === game.answer.trim().toLowerCase();
+  return userResponse.trim().toLowerCase() === game.answer.trim().toLowerCase();
 }

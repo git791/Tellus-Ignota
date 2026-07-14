@@ -241,19 +241,25 @@ api.get('/tiles', async (c) => {
   }
   await Promise.all(promises);
 
-  // Fetch active users in this chunk
+  return c.json<TilesResponse>({ type: 'tiles', tiles });
+});
+
+/**
+ * GET /api/active-users
+ * Returns all active user locations for the MMO sprites
+ */
+api.get('/active-users', async (c) => {
   const activeUsers: { username: string; x: number; y: number }[] = [];
   const userLocationsRaw = await redis.hGetAll('userLocations');
+  
   for (const [username, loc] of Object.entries(userLocationsRaw)) {
     const [sx, sy] = loc.split(':');
     const ux = parseInt(sx);
     const uy = parseInt(sy);
-    if (ux >= minX && ux <= maxX && uy >= minY && uy <= maxY) {
-      activeUsers.push({ username, x: ux, y: uy });
-    }
+    activeUsers.push({ username, x: ux, y: uy });
   }
 
-  return c.json<TilesResponse>({ type: 'tiles', tiles, activeUsers });
+  return c.json({ type: 'active-users', activeUsers });
 });
 
 /**

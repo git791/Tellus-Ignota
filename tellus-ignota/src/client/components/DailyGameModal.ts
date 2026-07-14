@@ -52,11 +52,6 @@ export class DailyGameModal {
           };
           this.optionsContainer.appendChild(btn);
         });
-      } else if (game.type === 'Reaction' || game.type === 'Memory') {
-        // Mock special client-side games by just having a "Complete" button for now
-        this.submitBtn.innerText = "Complete Challenge (Mock)";
-        this.submitBtn.style.display = 'inline-block';
-        this.currentAnswer = 'success';
       } else {
         this.input.style.display = 'inline-block';
         this.input.value = '';
