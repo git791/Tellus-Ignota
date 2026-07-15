@@ -138,6 +138,7 @@ export class UIScene extends Phaser.Scene {
       this.tileCount = data.tileCount;
       this.currentStreak = data.streak ?? 0;
       this.currentFreezes = data.streakFreezes ?? 0;
+      this.progressionModal.setSkinData(data.activeSkin ?? 0, data.unlockedSkins ?? [0]);
       this.refreshHUD();
     });
 
@@ -149,6 +150,7 @@ export class UIScene extends Phaser.Scene {
       this.tileCount = data.tileCount;
       this.currentStreak = data.streak ?? 0;
       this.currentFreezes = data.streakFreezes ?? 0;
+      this.progressionModal.setSkinData(data.activeSkin ?? 0, data.unlockedSkins ?? [0]);
       this.refreshHUD();
     });
 

@@ -88,7 +88,7 @@ export async function getOrGenerateDailyGame(): Promise<DailyGame> {
 /**
  * Validates the user's answer.
  */
-export function validateGameAnswer(game: DailyGame, userResponse: string): boolean {
+export function validateAnswer(game: DailyGame, userResponse: string): boolean {
   if (game.type === 'Math') {
     return userResponse.trim() === game.answer;
   }

@@ -60,8 +60,15 @@ Playing daily builds your **Exploration Streak**. As you maintain your streak, y
 
 ## 🛠️ Technical POV
 
+### 🎮 Powered by Phaser 3
+This entire project leverages **Phaser 3** inside a Devvit Custom Webview to create a rich, 2D MMO experience that would be impossible with native UI components alone. Phaser drives the core interactive loop:
+* **Dynamic Chunk Rendering:** The `ChunkManager` and `TerrainPainter` dynamically load, unload, and draw the procedural terrain tiles using Phaser's powerful WebGL rendering pipelines, maintaining 60FPS even on massive maps.
+* **Camera & Input Control:** Smooth panning, zooming, and click detection are handled seamlessly by Phaser's `InputPlugin` and `Cameras` systems (`camController.ts`), providing an intuitive, game-like feel.
+* **Live MMO Avatars & Particles:** When other players move, Phaser renders their sprites (`MapScene.ts`) gliding across the map in real-time. Phaser's Particle Emitters are used for the "Golden Age" explosions and skin auras!
+* **Seamless HTML Overlays:** While Phaser handles the heavy lifting of the game world rendering, it communicates via an event bus to overlay native HTML components for minigames and UI (`UIScene.ts`).
+
 ### The Stack
-* **Frontend:** Phaser 3 (TypeScript) running inside a Devvit Web iframe.
+* **Frontend:** Phaser 3 (TypeScript) driving the interactive canvas, encapsulated in a Devvit Web iframe.
 * **Backend:** Devvit Server Functions (Node/Hono) + TypeScript.
 * **Persistence:** Devvit's built-in Redis-backed KV store.
 * **Integration:** Native Reddit API (via Devvit) for grabbing live karma/comment data and posting clues.

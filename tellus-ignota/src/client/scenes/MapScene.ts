@@ -83,6 +83,9 @@ export class MapScene extends Phaser.Scene {
       this.cameras.resize(size.width, size.height);
     });
 
+    // Listen for skin changes from ProgressionModal
+    window.addEventListener('skin-changed', this.handleSkinChange);
+
     // Start polling active users
     this.time.addEvent({
       delay: 3000,
@@ -109,7 +112,17 @@ export class MapScene extends Phaser.Scene {
       this.frontier = new Set(data.frontier);
       this.chunkManager.setFrontier(data.frontier);
       
+      (this as any).activeSkin = data.activeSkin ?? 0;
+      
       this.applyCosmetics();
+
+      if (data.lastLocation) {
+        // Move avatar and camera to the last explored tile instead of (0,0)
+        const wx = data.lastLocation.x * TILE_SIZE + TILE_SIZE / 2;
+        const wy = data.lastLocation.y * TILE_SIZE + TILE_SIZE / 2;
+        this.avatarContainer.setPosition(wx, wy);
+        this.cameras.main.centerOn(wx, wy);
+      }
 
       // Tell UIScene about the initial state
       this.events.emit('game-init', data);
@@ -121,6 +134,8 @@ export class MapScene extends Phaser.Scene {
   }
 
   private async pollActiveUsers(): Promise<void> {
+    if (!this.username) return; // Don't poll until we know who we are, or we might spawn a clone
+
     try {
       const res = await fetch('/api/active-users');
       if (!res.ok) return;
@@ -140,6 +155,11 @@ export class MapScene extends Phaser.Scene {
 
     this.chunkManager.update(midX, midY);
     this.camController.update();
+  }
+
+  override destroy() {
+    window.removeEventListener('skin-changed', this.handleSkinChange);
+    super.destroy();
   }
 
   // ─── Avatar ─────────────────────────────────────────────────────────────────
@@ -182,16 +202,21 @@ export class MapScene extends Phaser.Scene {
 
   private applyCosmetics(): void {
     if (!this.avatar) return;
+    
+    const skinId = (this as any).activeSkin ?? 0;
+    this.avatar.clearTint();
 
-    if (this.score >= 500) {
-      // Golden Cartographer
+    if (skinId === 4) {
+      this.avatar.setTint(0x9966cc);
+      this.setupGoldenAura(); // Let's keep aura for highest tiers
+    } else if (skinId === 3) {
       this.avatar.setTint(0xffd700);
       this.setupGoldenAura();
-    } else if (this.score >= 100) {
-      // Silver Cartographer
+    } else if (skinId === 2) {
       this.avatar.setTint(0xc0c0c0);
+    } else if (skinId === 1) {
+      this.avatar.setTint(0xcd7f32);
     } else {
-      // Standard Cartographer
       this.avatar.clearTint();
     }
   }
@@ -374,7 +399,13 @@ export class MapScene extends Phaser.Scene {
     }
   }
 
-  // ─── Decorations ─────────────────────────────────────────────────────────────
+  private handleSkinChange = (e: Event) => {
+    const ev = e as CustomEvent<number>;
+    (this as any).activeSkin = ev.detail;
+    this.applyCosmetics();
+  }
+
+  // ─── Input & Lifecycle ─────────────────────────────────────────────────────────────
 
   private addDecoration(tx: number, ty: number, terrain: string): void {
     if (terrain !== 'forest' && terrain !== 'plains') return;
@@ -403,12 +434,19 @@ export class MapScene extends Phaser.Scene {
 
   // ─── MMO Sprites ─────────────────────────────────────────────────────────────
 
-  private updateActiveUsers(users: { username: string; x: number; y: number }[]): void {
+  private updateActiveUsers(users: { username: string; x: number; y: number; skinId?: number }[]): void {
     const activeNames = new Set<string>();
 
     for (const u of users) {
       if (u.username === this.username) continue; // Skip current user (we have our own avatar)
       activeNames.add(u.username);
+
+      const skinId = u.skinId ?? 0;
+      let tint = 0xffffff;
+      if (skinId === 4) tint = 0x9966cc;
+      else if (skinId === 3) tint = 0xffd700;
+      else if (skinId === 2) tint = 0xc0c0c0;
+      else if (skinId === 1) tint = 0xcd7f32;
 
       if (!this.otherPlayers.has(u.username)) {
         // Create new MMO sprite container
@@ -421,7 +459,9 @@ export class MapScene extends Phaser.Scene {
         const sprite = this.add.sprite(0, 0, 'cartographer');
         const scale = (TILE_SIZE / Math.max(sprite.width, sprite.height)) * 0.8;
         sprite.setScale(scale);
-        sprite.setTint(0xaaaaaa); // Slight tint for others
+        
+        if (tint !== 0xffffff) sprite.setTint(tint);
+        else sprite.clearTint();
 
         // Make interactive to show name
         sprite.setInteractive();
@@ -439,8 +479,14 @@ export class MapScene extends Phaser.Scene {
         container.add([sprite, text]);
         this.otherPlayers.set(u.username, container);
       } else {
-        // Update existing player position
+        // Update existing player position and skin
         const container = this.otherPlayers.get(u.username)!;
+        const sprite = container.getFirst() as Phaser.GameObjects.Sprite;
+        if (sprite && sprite.setTint) {
+          if (tint !== 0xffffff) sprite.setTint(tint);
+          else sprite.clearTint();
+        }
+        
         const wx = u.x * TILE_SIZE + TILE_SIZE / 2;
         const wy = u.y * TILE_SIZE + TILE_SIZE / 2;
         

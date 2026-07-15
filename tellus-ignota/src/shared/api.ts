@@ -42,6 +42,10 @@ export type GameInitResponse = {
   streak: number;
   streakFreezes: number;
   streakMilestone: string | null;
+  /** The user's last known location for avatar spawn */
+  lastLocation?: { x: number; y: number };
+  activeSkin: number;
+  unlockedSkins: number[];
 };
 
 /** GET /api/tiles?minX&minY&maxX&maxY */
@@ -54,7 +58,7 @@ export type TilesResponse = {
 /** GET /api/active-users */
 export type ActiveUsersResponse = {
   type: 'active-users';
-  activeUsers: { username: string; x: number; y: number }[];
+  activeUsers: { username: string; x: number; y: number; skinId: number }[];
 };
 
 /** POST /api/reveal  body: RevealRequest */
@@ -75,6 +79,17 @@ export type RevealResponse =
       ok: false;
       error: string;
     };
+
+// ---- Skins ----
+
+export type SetSkinRequest = {
+  skinId: number;
+};
+
+export type SetSkinResponse = {
+  ok: boolean;
+  error?: string;
+};
 
 // ---- Progression & Leaderboard ----
 

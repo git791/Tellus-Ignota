@@ -148,7 +148,7 @@ api.get('/game-init', async (c) => {
 
     const username = await reddit.getCurrentUsername().catch(() => undefined);
     const actualUsername = username ?? 'anonymous';
-    const [lastAction, hasWonGame, frontier, tileCount, scoreRaw, post, streakData] = await Promise.all([
+    const [lastAction, hasWonGame, frontier, tileCount, scoreRaw, post, streakData, myLocationStr, activeSkinStr] = await Promise.all([
       redis.get(`lastAction:${actualUsername}`),
       redis.get(`wonDailyGame:${actualUsername}:${today}`),
       getFrontier(),
@@ -156,7 +156,26 @@ api.get('/game-init', async (c) => {
       redis.zScore('leaderboard:score', actualUsername),
       reddit.getPostById(postId),
       getStreakData(actualUsername),
+      redis.hGet('userLocations', actualUsername),
+      redis.get(`activeSkin:${actualUsername}`),
     ]);
+    
+    let lastLocation: {x: number, y: number} | undefined = undefined;
+    if (myLocationStr) {
+      const parts = myLocationStr.split(':');
+      lastLocation = { x: parseInt(parts[0]), y: parseInt(parts[1]) };
+    }
+    
+    const score = scoreRaw ?? 0;
+    
+    // Calculate unlocked skins based on score
+    const unlockedSkins = [0]; // default is always unlocked
+    if (score >= 100) unlockedSkins.push(1); // Bronze
+    if (score >= 300) unlockedSkins.push(2); // Silver
+    if (score >= 500) unlockedSkins.push(3); // Gold
+    if (score >= 1000) unlockedSkins.push(4); // Amethyst
+    
+    const activeSkin = activeSkinStr ? parseInt(activeSkinStr) : 0;
     
     const communityGoalReached = post.score >= COMMUNITY_GOAL_THRESHOLD;
 
@@ -169,13 +188,16 @@ api.get('/game-init', async (c) => {
       username: actualUsername,
       canActToday,
       needsToPlayGame,
-      score: scoreRaw ?? 0,
+      score: score,
       communityGoalReached,
       frontier,
       tileCount,
       streak: streakData.currentStreak,
       streakFreezes: streakData.freezes,
       streakMilestone: getStreakMilestone(streakData.currentStreak),
+      lastLocation,
+      activeSkin,
+      unlockedSkins,
     });
   } catch (error) {
     console.error('game-init error:', error);
@@ -253,10 +275,11 @@ api.get('/active-users', async (c) => {
   const userLocationsRaw = await redis.hGetAll('userLocations');
   
   for (const [username, loc] of Object.entries(userLocationsRaw)) {
-    const [sx, sy] = loc.split(':');
-    const ux = parseInt(sx);
-    const uy = parseInt(sy);
-    activeUsers.push({ username, x: ux, y: uy });
+    const parts = loc.split(':');
+    const ux = parseInt(parts[0]);
+    const uy = parseInt(parts[1]);
+    const skinId = parts[2] ? parseInt(parts[2]) : 0;
+    activeUsers.push({ username, x: ux, y: uy, skinId });
   }
 
   return c.json({ type: 'active-users', activeUsers });
@@ -395,8 +418,10 @@ api.post('/reveal', async (c) => {
     // Also set lastAction for backward compatibility with UI checks
     await redis.set(`lastAction:${username}`, today);
 
-    // Save the user's last explored location for the MMO map sprites
-    await redis.hSet('userLocations', { [username]: `${x}:${y}` });
+    // Save the user's last explored location and skin for the MMO map sprites
+    const activeSkinStr = await redis.get(`activeSkin:${username}`);
+    const activeSkin = activeSkinStr ? parseInt(activeSkinStr) : 0;
+    await redis.hSet('userLocations', { [username]: `${x}:${y}:${activeSkin}` });
 
     // 8 — Post clue comment if artifact found
     if (artifactId) {
@@ -417,10 +442,54 @@ api.post('/reveal', async (c) => {
     });
   } catch (error) {
     console.error('reveal error:', error);
-    return c.json<RevealResponse>({
-      ok: false,
-      error: error instanceof Error ? error.message : 'Unknown server error',
-    });
+    return c.json<RevealResponse>({ ok: false, error: 'Internal server error' }, 500);
+  }
+});
+
+/**
+ * POST /api/set-skin
+ * Sets the active skin for the user
+ */
+api.post('/set-skin', async (c) => {
+  const { postId } = context;
+  if (!postId) return c.json({ ok: false, error: 'postId missing' }, 400);
+  
+  try {
+    const username = await reddit.getCurrentUsername().catch(() => undefined);
+    if (!username) return c.json({ ok: false, error: 'Must be logged in' }, 401);
+    
+    const body = await c.req.json<{ skinId: number }>();
+    const skinId = body.skinId;
+    
+    const scoreRaw = await redis.zScore('leaderboard:score', username);
+    const score = scoreRaw ?? 0;
+    
+    // Validate they own it
+    const unlockedSkins = [0];
+    if (score >= 100) unlockedSkins.push(1);
+    if (score >= 300) unlockedSkins.push(2);
+    if (score >= 500) unlockedSkins.push(3);
+    if (score >= 1000) unlockedSkins.push(4);
+    
+    if (!unlockedSkins.includes(skinId)) {
+      return c.json({ ok: false, error: 'Skin not unlocked' }, 403);
+    }
+    
+    await redis.set(`activeSkin:${username}`, skinId.toString());
+    
+    // Also update their MMO location string so the skin change reflects instantly to everyone
+    const myLocationStr = await redis.hGet('userLocations', username);
+    if (myLocationStr) {
+      const parts = myLocationStr.split(':');
+      if (parts.length >= 2) {
+        await redis.hSet('userLocations', { [username]: `${parts[0]}:${parts[1]}:${skinId}` });
+      }
+    }
+    
+    return c.json({ ok: true });
+  } catch (err) {
+    console.error('set-skin error:', err);
+    return c.json({ ok: false, error: 'Internal server error' }, 500);
   }
 });
 
